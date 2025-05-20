@@ -304,12 +304,12 @@
 					"basic": [
 						{
 							"key": "password",
-							"value": "admin123",
+							"value": "14475cf9-94eb-4d5e-b441-7b7d20cca3b7",
 							"type": "string"
 						},
 						{
 							"key": "username",
-							"value": "admin",
+							"value": "customer11",
 							"type": "string"
 						}
 					]

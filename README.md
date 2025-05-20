@@ -37,16 +37,20 @@ Default values are provided in application.properties file.
 - For simplicity customer username and password are already defined. 
 - Customers log in with:
     - **Username** = `customer{id}` (for example customer with id 12: `customer12`)
-    - **Password** = their assigned `uuid` (generated when the customer is created)
+    - **Password** = their assigned `uuid` (generated when the customer is created: CreateCustomer Response)
 
-> Example:
+> Example Create customer response:
 > ```json
 > {
->   "name": "customer23",
->   "uuid": "a15ec071-34e2-4afc-8e1b-8147a0f40017"
+> "id": 23,
+> "name": "ali",
+> "surname": "demir",
+> "creditLimit": 2000,
+> "usedCreditLimit": 0.0,
+> "uuid": "14475cf9-94eb-4d5e-b441-7b7d20cca3b7"
 > }
 > ```
-> Base64 encode: `customer23:a15ec071...` and use in Basic Auth.
+> Base64 encode: `customer23:14475cf9...` and use in Basic Auth.
 
 --
 
@@ -104,7 +108,7 @@ To run all unit tests:
 ./mvnw test
 ```
 ###  Local Tests
-To test APIs in local you can import the Postman collection `loan-api.postman_collection.json` and run the tests there.
+To test APIs in local you can import the Postman collection `loan-api.postman_collection.json` and test the requests.
 Update the authorization tab for each request to use Basic Auth
 
 ###  Packaging the App
