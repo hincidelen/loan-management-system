@@ -37,7 +37,8 @@ Default values are provided in application.properties file.
 - For simplicity customer username and password are already defined. 
 - Customers log in with:
     - **Username** = `customer{id}` (for example customer with id 12: `customer12`)
-    - **Password** = their assigned `uuid` (generated when the customer is created: CreateCustomerResponse)
+    - **Password** = their assigned `uuid` 
+  (generated using UUID when the customer is created. It can be found at response of CreateCustomer)
 
 > Example Create customer response:
 > ```json
