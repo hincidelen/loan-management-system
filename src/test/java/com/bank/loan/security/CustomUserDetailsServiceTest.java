@@ -15,12 +15,11 @@ class CustomUserDetailsServiceTest {
     private CustomerService customerService;
     private CustomUserDetailsService userDetailsService;
 
-    private final String ADMIN_USERNAME = "admin";
-    private final String ADMIN_PASSWORD = "admin123";
-
     @BeforeEach
     void setUp() {
         customerService = mock(CustomerService.class);
+        String ADMIN_USERNAME = "admin";
+        String ADMIN_PASSWORD = "admin123";
         userDetailsService = new CustomUserDetailsService(customerService, ADMIN_USERNAME, ADMIN_PASSWORD);
     }
 
@@ -50,18 +49,14 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void shouldThrowWhenCustomerIdInvalidFormat() {
-        assertThrows(UsernameNotFoundException.class, () -> {
-            userDetailsService.loadUserByUsername("customerXYZ");
-        });
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("customerXYZ"));
     }
 
     @Test
     void shouldThrowWhenCustomerNotFound() {
         when(customerService.getCustomerEntityById(999L)).thenThrow(new RuntimeException("Not found"));
 
-        assertThrows(UsernameNotFoundException.class, () -> {
-            userDetailsService.loadUserByUsername("customer999");
-        });
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("customer999"));
     }
 
     @Test

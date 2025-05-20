@@ -30,5 +30,4 @@ public class CustomerDTO {
     public void setCreditLimit(Double creditLimit) { this.creditLimit = creditLimit; }
 
     public Double getUsedCreditLimit() { return usedCreditLimit; }
-    public void setUsedCreditLimit(Double usedCreditLimit) { this.usedCreditLimit = usedCreditLimit; }
 }

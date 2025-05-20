@@ -60,9 +60,7 @@ class SecurityConfigTest {
         Mockito.when(userDetailsService.retrieveCustomerIdFromUsername("customer9"))
                 .thenReturn(9L);
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> {
-            securityConfig.checkCustomerAccessControl(10L);
-        });
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> securityConfig.checkCustomerAccessControl(10L));
 
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }

@@ -25,7 +25,7 @@ public class Loan {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<LoanInstallment> installments;
 
     public Long getId() {
