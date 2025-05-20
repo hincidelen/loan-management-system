@@ -2,6 +2,7 @@ package com.bank.loan.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class Customer {
@@ -20,6 +21,24 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Loan> loans;
+
+    @Column(unique = true)
+    private String uuid;
+
+    @PrePersist
+    public void generateUUID() {
+        if (uuid == null) {
+            this.uuid = UUID.randomUUID().toString();
+        }
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Long getId() {
         return id;
@@ -59,13 +78,5 @@ public class Customer {
 
     public void setUsedCreditLimit(Double usedCreditLimit) {
         this.usedCreditLimit = usedCreditLimit;
-    }
-
-    public List<Loan> getLoans() {
-        return loans;
-    }
-
-    public void setLoans(List<Loan> loans) {
-        this.loans = loans;
     }
 }

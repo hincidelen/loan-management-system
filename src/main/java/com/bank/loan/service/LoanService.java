@@ -1,7 +1,6 @@
 package com.bank.loan.service;
 
 import com.bank.loan.dto.CreateLoanRequest;
-import com.bank.loan.dto.CustomerDTO;
 import com.bank.loan.dto.LoanDTO;
 import com.bank.loan.dto.LoanInstallmentDTO;
 import com.bank.loan.model.*;
@@ -39,7 +38,6 @@ public class LoanService {
     public LoanDTO createLoan(CreateLoanRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
-
 
         double totalWithInterest = request.getLoanAmount() * (1 + request.getInterestRate());
         validateCreateLoanRequest(request, customer, totalWithInterest);
@@ -97,18 +95,30 @@ public class LoanService {
         return installments;
     }
 
-    public List<LoanDTO> getLoansByCustomerId(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
-        List<Loan> customerLoans = loanRepository.findByCustomer(customer);
+    public List<LoanDTO> getLoansByCustomerId(Long customerId, Integer numberOfInstallments, Boolean isPaid) {
+        List<Loan> customerLoans = getLoansByCustomerWithFilters(customerId, numberOfInstallments, isPaid);
         return customerLoans.stream().map(this::toLoanDTO).collect(Collectors.toList());
     }
+    public List<Loan> getLoansByCustomerWithFilters(Long customerId, Integer numberOfInstallments, Boolean isPaid) {
+        if (numberOfInstallments != null && isPaid != null) {
+            return loanRepository.findByCustomerIdAndNumberOfInstallmentsAndIsPaid(customerId, numberOfInstallments, isPaid);
+        } else if (numberOfInstallments != null) {
+            return loanRepository.findByCustomerIdAndNumberOfInstallments(customerId, numberOfInstallments);
+        } else if (isPaid != null) {
+            return loanRepository.findByCustomerIdAndIsPaid(customerId, isPaid);
+        } else {
+            return loanRepository.findByCustomerId(customerId);
+        }
+    }
 
-    public List<LoanInstallmentDTO> getInstallmentsForLoan(Long loanId) {
-        Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
+    public List<LoanInstallmentDTO> getInstallmentsForLoan(Loan loan) {
         List<LoanInstallment> loanInstallments = installmentRepository.findByLoanOrderByDueDateAsc(loan);
         return loanInstallments.stream().map(this::toLoanInstallmentDTO).collect(Collectors.toList());
+    }
+
+    public Loan getLoanById(Long loanId) {
+        return loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
     }
 
     public LoanDTO toLoanDTO(Loan loan) {

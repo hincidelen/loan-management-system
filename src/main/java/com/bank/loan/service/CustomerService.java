@@ -1,5 +1,6 @@
 package com.bank.loan.service;
 
+import com.bank.loan.dto.CreateCustomerDTO;
 import com.bank.loan.dto.CustomerDTO;
 import com.bank.loan.model.Customer;
 import com.bank.loan.repository.CustomerRepository;
@@ -21,14 +22,14 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public CustomerDTO createCustomer(CustomerDTO customerDTO) {
+    public CreateCustomerDTO createCustomer(CustomerDTO customerDTO) {
         Customer customer = new Customer();
         customer.setName(customerDTO.getName());
         customer.setSurname(customerDTO.getSurname());
         customer.setCreditLimit(customerDTO.getCreditLimit());
         customer.setUsedCreditLimit(0.0);
-
-        return toDTO(customerRepository.save(customer));
+        customer = customerRepository.save(customer);
+        return new CreateCustomerDTO(toDTO(customer), customer.getUuid());
     }
 
     public List<CustomerDTO> getAllCustomers() {

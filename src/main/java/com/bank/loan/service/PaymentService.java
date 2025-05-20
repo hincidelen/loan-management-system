@@ -6,9 +6,8 @@ import com.bank.loan.model.*;
 import com.bank.loan.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -20,28 +19,26 @@ public class PaymentService {
     private final LoanRepository loanRepository;
     private final LoanInstallmentRepository installmentRepository;
     private final CustomerRepository customerRepository;
+    private final Integer dueDateLimit;
 
     @Autowired
     public PaymentService(LoanRepository loanRepository,
                           LoanInstallmentRepository installmentRepository,
-                          CustomerRepository customerRepository) {
+                          CustomerRepository customerRepository, @Value("${loan.due.date.limit:3}") Integer dueDateLimit) {
         this.loanRepository = loanRepository;
         this.installmentRepository = installmentRepository;
         this.customerRepository = customerRepository;
+        this.dueDateLimit = dueDateLimit;
     }
 
     @Transactional
-    public PayLoanResponse payLoan(PayLoanRequest request) {
-        Loan loan = loanRepository.findById(request.getLoanId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
-
+    public PayLoanResponse payLoan(PayLoanRequest request, Loan loan) {
         Customer customer = loan.getCustomer();
         double remainingPayment = request.getPaymentAmount();
         int paidInstallmentCount = 0;
         double totalPaid = 0.0;
 
-        // Limit: 3 calendar months from today
-        LocalDate maxDue = getMaxDue();
+        LocalDate maxDue = getMaxDueDate();
 
         List<LoanInstallment> eligibleInstallments = installmentRepository
                 .findByLoanAndIsPaidFalseAndDueDateLessThanEqualOrderByDueDateAsc(loan, maxDue);
@@ -53,12 +50,8 @@ public class PaymentService {
 
             finalAmount = getFinalAmountOfEarlyAndLatePaymentAdjustment(inst, finalAmount);
 
-            // Can we fully pay this installment?
             if (remainingPayment >= finalAmount) {
-                inst.setPaidAmount(finalAmount);
-                inst.setIsPaid(true);
-                inst.setPaymentDate(LocalDate.now());
-                installmentRepository.save(inst);
+                payInstallment(inst, finalAmount);
 
                 remainingPayment -= finalAmount;
                 totalPaid += finalAmount;
@@ -83,15 +76,22 @@ public class PaymentService {
         return response;
     }
 
-    private static void updateUserCreditLimit(Customer customer, double totalPaid) {
+    private void payInstallment(LoanInstallment inst, double finalAmount) {
+        inst.setPaidAmount(finalAmount);
+        inst.setIsPaid(true);
+        inst.setPaymentDate(LocalDate.now());
+        installmentRepository.save(inst);
+    }
+
+    private void updateUserCreditLimit(Customer customer, double totalPaid) {
         customer.setUsedCreditLimit(customer.getUsedCreditLimit() - totalPaid);
     }
 
-    private static LocalDate getMaxDue() {
-        return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).plusMonths(3);
+    private LocalDate getMaxDueDate() {
+        return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).plusMonths(dueDateLimit);
     }
 
-    private static double getFinalAmountOfEarlyAndLatePaymentAdjustment(LoanInstallment inst, double finalAmount) {
+    private double getFinalAmountOfEarlyAndLatePaymentAdjustment(LoanInstallment inst, double finalAmount) {
         long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), inst.getDueDate());
         if (daysDiff > 0) {
             finalAmount -= getDiscountAmount(inst, daysDiff);
@@ -101,11 +101,11 @@ public class PaymentService {
         return finalAmount;
     }
 
-    private static double getPenaltyAmount(LoanInstallment inst, long daysDiff) {
+    private double getPenaltyAmount(LoanInstallment inst, long daysDiff) {
         return inst.getAmount() * 0.001 * Math.abs(daysDiff);
     }
 
-    private static double getDiscountAmount(LoanInstallment inst, long daysDiff) {
+    private double getDiscountAmount(LoanInstallment inst, long daysDiff) {
         return inst.getAmount() * 0.001 * daysDiff;
     }
 }

@@ -1,6 +1,8 @@
 package com.bank.loan.controller;
 
+import com.bank.loan.dto.CreateCustomerDTO;
 import com.bank.loan.dto.CustomerDTO;
+import com.bank.loan.security.SecurityUtil;
 import com.bank.loan.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,8 +23,15 @@ public class CustomerController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public CustomerDTO createCustomer(@RequestBody CustomerDTO customerDTO) {
+    public CreateCustomerDTO createCustomer(@RequestBody CustomerDTO customerDTO) {
         return customerService.createCustomer(customerDTO);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    @GetMapping("/{id}")
+    public CustomerDTO getCustomerById(@PathVariable Long id) {
+        SecurityUtil.checkCustomerAccessControl(id);
+        return customerService.getCustomerById(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -31,9 +40,4 @@ public class CustomerController {
         return customerService.getAllCustomers();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-    @GetMapping("/{id}")
-    public CustomerDTO getCustomerById(@PathVariable Long id) {
-        return customerService.getCustomerById(id);
-    }
 }

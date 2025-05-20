@@ -83,12 +83,4 @@ public class Loan {
     public void setCustomer(Customer customer) {
         this.customer = customer;
     }
-
-    public List<LoanInstallment> getInstallments() {
-        return installments;
-    }
-
-    public void setInstallments(List<LoanInstallment> installments) {
-        this.installments = installments;
-    }
 }

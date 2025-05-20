@@ -1,6 +1,7 @@
 package com.bank.loan.dto;
 
 public class CustomerDTO {
+
     private Long id;
     private String name;
     private String surname;
@@ -8,7 +9,6 @@ public class CustomerDTO {
     private Double usedCreditLimit;
 
     public CustomerDTO() {}
-
     public CustomerDTO(Long id, String name, String surname, Double creditLimit, Double usedCreditLimit) {
         this.id = id;
         this.name = name;
