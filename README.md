@@ -1,4 +1,4 @@
-# LoanManagementSystem API (Spring Boot)
+# Loan Management System
 
 This is a backend loan management API for a bank. It allows bank employees to create, list, and pay customer loans.
 
@@ -37,17 +37,17 @@ Default values are provided in application.properties file.
 - For simplicity customer username and password are already defined. 
 - Customers log in with:
     - **Username** = `customer{id}` (for example customer with id 12: `customer12`)
-    - **Password** = their assigned `uuid` (generated when the customer is created: CreateCustomer Response)
+    - **Password** = their assigned `uuid` (generated when the customer is created: CreateCustomerResponse)
 
 > Example Create customer response:
 > ```json
 > {
-> "id": 23,
-> "name": "ali",
-> "surname": "demir",
-> "creditLimit": 2000,
-> "usedCreditLimit": 0.0,
-> "uuid": "14475cf9-94eb-4d5e-b441-7b7d20cca3b7"
+>   "id": 23,
+>   "name": "ali",
+>   "surname": "demir",
+>   "creditLimit": 2000,
+>   "usedCreditLimit": 0.0,
+>   "uuid": "14475cf9-94eb-4d5e-b441-7b7d20cca3b7"
 > }
 > ```
 > Base64 encode: `customer23:14475cf9...` and use in Basic Auth.
