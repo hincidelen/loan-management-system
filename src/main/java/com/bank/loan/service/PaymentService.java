@@ -24,7 +24,8 @@ public class PaymentService {
     @Autowired
     public PaymentService(LoanRepository loanRepository,
                           LoanInstallmentRepository installmentRepository,
-                          CustomerRepository customerRepository, @Value("${loan.due.date.limit:3}") Integer dueDateLimit) {
+                          CustomerRepository customerRepository,
+                          @Value("${loan.due.date.limit:3}") Integer dueDateLimit) {
         this.loanRepository = loanRepository;
         this.installmentRepository = installmentRepository;
         this.customerRepository = customerRepository;

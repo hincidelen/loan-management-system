@@ -7,6 +7,7 @@ import com.bank.loan.model.*;
 import com.bank.loan.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,18 +21,31 @@ import java.util.stream.Collectors;
 @Service
 public class LoanService {
 
+    private final double MIN_INTEREST_RATE;
+    private final double MAX_INTEREST_RATE;
+    private final List<Integer> AVAILABLE_INSTALLMENT_NUMBERS;
     private final LoanRepository loanRepository;
     private final CustomerRepository customerRepository;
     private final LoanInstallmentRepository installmentRepository;
     private final CustomerService customerService;
 
     @Autowired
-    public LoanService(LoanRepository loanRepository, CustomerRepository customerRepository,
-                       LoanInstallmentRepository installmentRepository, CustomerService customerService) {
+    public LoanService(
+            LoanRepository loanRepository,
+            CustomerRepository customerRepository,
+            LoanInstallmentRepository installmentRepository,
+            CustomerService customerService,
+            @Value("${loan.min-interest-rate:0.1}") double MIN_INTEREST_RATE,
+            @Value("${loan.max-interest-rate:0.5}") double MAX_INTEREST_RATE,
+            @Value("#{'${loan.available-installment-numbers:6,9,12,24}'}") List<Integer> AVAILABLE_INSTALLMENT_NUMBERS
+    ) {
         this.loanRepository = loanRepository;
         this.customerRepository = customerRepository;
         this.installmentRepository = installmentRepository;
         this.customerService = customerService;
+        this.MIN_INTEREST_RATE = MIN_INTEREST_RATE;
+        this.MAX_INTEREST_RATE = MAX_INTEREST_RATE;
+        this.AVAILABLE_INSTALLMENT_NUMBERS = AVAILABLE_INSTALLMENT_NUMBERS;
     }
 
     @Transactional
@@ -53,12 +67,12 @@ public class LoanService {
         return toLoanDTO(loan);
     }
 
-    private static void validateCreateLoanRequest(CreateLoanRequest request, Customer customer, double totalWithInterest) {
-        if (!List.of(6, 9, 12, 24).contains(request.getNumberOfInstallments())) {
+    private void validateCreateLoanRequest(CreateLoanRequest request, Customer customer, double totalWithInterest) {
+        if (!AVAILABLE_INSTALLMENT_NUMBERS.contains(request.getNumberOfInstallments())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid installment count");
         }
 
-        if (request.getInterestRate() < 0.1 || request.getInterestRate() > 0.5) {
+        if (request.getInterestRate() < MIN_INTEREST_RATE || request.getInterestRate() > MAX_INTEREST_RATE) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid interest rate");
         }
 
@@ -67,7 +81,7 @@ public class LoanService {
         }
     }
 
-    private static Loan createLoan(CreateLoanRequest request, Customer customer) {
+    private Loan createLoan(CreateLoanRequest request, Customer customer) {
         Loan loan = new Loan();
         loan.setCustomer(customer);
         loan.setLoanAmount(request.getLoanAmount());
@@ -78,7 +92,7 @@ public class LoanService {
         return loan;
     }
 
-    private static List<LoanInstallment> createInstallments(CreateLoanRequest request, double totalWithInterest, Loan loan) {
+    private List<LoanInstallment> createInstallments(CreateLoanRequest request, double totalWithInterest, Loan loan) {
         List<LoanInstallment> installments = new ArrayList<>();
         double installmentAmount = totalWithInterest / request.getNumberOfInstallments();
         LocalDate dueDate = LocalDate.now().plusMonths(1).with(TemporalAdjusters.firstDayOfMonth());

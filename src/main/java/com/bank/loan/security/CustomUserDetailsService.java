@@ -51,7 +51,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public Long retrieveCustomerIdFromUsername(String username) {
-        // String username  customer232 will return 232
         username = username.replace("customer", "");
         return Long.parseLong(username);
     }

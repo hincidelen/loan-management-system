@@ -28,7 +28,8 @@ class LoanServiceTest {
         customerRepository = mock(CustomerRepository.class);
         installmentRepository = mock(LoanInstallmentRepository.class);
         CustomerService customerService = mock(CustomerService.class);
-        loanService = new LoanService(loanRepository, customerRepository, installmentRepository, customerService);
+        loanService = new LoanService(loanRepository, customerRepository, installmentRepository, customerService,
+                0.1, 0.5, List.of(6, 9, 12, 24));
     }
 
     @Test
