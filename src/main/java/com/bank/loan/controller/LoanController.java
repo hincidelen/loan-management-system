@@ -4,7 +4,7 @@ import com.bank.loan.dto.CreateLoanRequest;
 import com.bank.loan.dto.LoanDTO;
 import com.bank.loan.dto.LoanInstallmentDTO;
 import com.bank.loan.model.Loan;
-import com.bank.loan.security.SecurityUtil;
+import com.bank.loan.security.SecurityConfig;
 import com.bank.loan.service.LoanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,16 +17,18 @@ import java.util.List;
 public class LoanController {
 
     private final LoanService loanService;
+    private final SecurityConfig securityConfig;
 
     @Autowired
-    public LoanController(LoanService loanService) {
+    public LoanController(LoanService loanService, SecurityConfig securityConfig) {
         this.loanService = loanService;
+        this.securityConfig = securityConfig;
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     @PostMapping
     public LoanDTO createLoan(@RequestBody CreateLoanRequest request) {
-        SecurityUtil.checkCustomerAccessControl(request.getCustomerId());
+        securityConfig.checkCustomerAccessControl(request.getCustomerId());
         return loanService.createLoan(request);
     }
 
@@ -37,7 +39,7 @@ public class LoanController {
             @RequestParam(required = false) Integer numberOfInstallments,
             @RequestParam(required = false) Boolean isPaid
     ) {
-        SecurityUtil.checkCustomerAccessControl(customerId);
+        securityConfig.checkCustomerAccessControl(customerId);
         return loanService.getLoansByCustomerId(customerId, numberOfInstallments, isPaid);
     }
 
@@ -45,7 +47,7 @@ public class LoanController {
     @GetMapping("/{loanId}/installments")
     public List<LoanInstallmentDTO> getInstallments(@PathVariable Long loanId) {
         Loan loan = loanService.getLoanById(loanId);
-        SecurityUtil.checkCustomerAccessControl(loan.getCustomer());
+        securityConfig.checkCustomerAccessControl(loan.getCustomer());
         return loanService.getInstallmentsForLoan(loan);
     }
 }

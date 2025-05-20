@@ -13,14 +13,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    private final CustomerService customerService;
+    private final String adminUsername;
+    private final String adminPassword;
+
     @Autowired
-    private CustomerService customerService;
+    public CustomUserDetailsService(
+            CustomerService customerService,
+            @Value("${admin.username:admin}") String adminUsername,
+            @Value("${admin.password}")String adminPassword) {
+        this.customerService = customerService;
+        this.adminUsername = adminUsername;
+        this.adminPassword = adminPassword;
+    }
 
-    @Value("${admin.username:admin}")
-    private String adminUsername;
-
-    @Value("${admin.password}")
-    private String adminPassword;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -32,7 +38,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .build();
         }
         try {
-            Long customerId = SecurityUtil.retrieveCustomerIdFromUsername(username);
+            Long customerId = retrieveCustomerIdFromUsername(username);
             Customer customer = customerService.getCustomerEntityById(customerId);
             return User.builder()
                     .username(username)
@@ -42,5 +48,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         } catch (Exception e) {
             throw new UsernameNotFoundException("User not found");
         }
+    }
+
+    public Long retrieveCustomerIdFromUsername(String username) {
+        // String username  customer232 will return 232
+        username = username.replace("customer", "");
+        return Long.parseLong(username);
     }
 }

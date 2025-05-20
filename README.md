@@ -1,4 +1,4 @@
-# Credit Module - Loan API (Spring Boot)
+# LoanManagementSystem API (Spring Boot)
 
 This is a backend loan management API for a bank. It allows bank employees to create, list, and pay customer loans.
 
@@ -91,3 +91,35 @@ Default values are provided in application.properties file.
 
 ```bash
 ./mvnw spring-boot:run
+
+
+```
+
+##  Running Tests
+
+###  Unit Tests
+To run all unit tests:
+
+```bash
+./mvnw test
+```
+###  Local Tests
+To test APIs in local you can import the Postman collection `loan-api.postman_collection.json` and run the tests there.
+Update the authorization tab for each request to use Basic Auth
+
+###  Packaging the App
+To build a standalone .jar:
+
+```bash
+./mvnw clean package
+```
+
+Then run:
+
+```bash
+java -jar target/LoanManagementSystem-*.jar
+```
+
+App will start on http://localhost:8080
+
+---

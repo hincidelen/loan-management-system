@@ -2,7 +2,7 @@ package com.bank.loan.controller;
 
 import com.bank.loan.dto.CreateCustomerDTO;
 import com.bank.loan.dto.CustomerDTO;
-import com.bank.loan.security.SecurityUtil;
+import com.bank.loan.security.SecurityConfig;
 import com.bank.loan.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,10 +15,12 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final SecurityConfig securityConfig;
 
     @Autowired
-    public CustomerController(CustomerService customerService) {
+    public CustomerController(CustomerService customerService, SecurityConfig securityConfig) {
         this.customerService = customerService;
+        this.securityConfig = securityConfig;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -30,7 +32,7 @@ public class CustomerController {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     @GetMapping("/{id}")
     public CustomerDTO getCustomerById(@PathVariable Long id) {
-        SecurityUtil.checkCustomerAccessControl(id);
+        securityConfig.checkCustomerAccessControl(id);
         return customerService.getCustomerById(id);
     }
 
